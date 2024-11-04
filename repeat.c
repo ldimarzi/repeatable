@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 void print_usage() {
-    printf("Usage: repeat <command> -n<number_of_repetitions>\n");
+    printf("Usage: repeat <command> -n <number_of_repetitions>\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -14,32 +13,46 @@ int main(int argc, char *argv[]) {
     }
 
     int repetitions = 0;
-    char *command = NULL;
+    char command[1024] = "";  // Buffer to hold the command
 
-    for (int i = 1; i < argc; i++) {
-        if (strncmp(argv[i], "-n", 2) == 0) {
-            repetitions = atoi(argv[i] + 2);
-            if (repetitions <= 0) {
-                fprintf(stderr, "Error: The number of repetitions must be a positive integer.\n");
+    // Parse arguments
+    int i = 1;
+    while (i < argc) {
+        // Check for the "-n" flag
+        if (strcmp(argv[i], "-n") == 0) {
+            if (i + 1 < argc) {
+                repetitions = atoi(argv[i + 1]);
+                if (repetitions <= 0) {
+                    fprintf(stderr, "Error: The number of repetitions must be a positive integer.\n");
+                    return 1;
+                }
+                i += 2; // Skip the "-n" and the number after it
+            } else {
+                print_usage();
                 return 1;
             }
         } else {
-            command = argv[i];
+            // Append the command arguments to form the command string
+            strcat(command, argv[i]);
+            strcat(command, " ");
+            i++;
         }
     }
 
-    if (repetitions == 0 || command == NULL) {
+    if (repetitions == 0 || strlen(command) == 0) {
         print_usage();
         return 1;
     }
 
-    for (int i = 0; i < repetitions; i++) {
+    // Execute the command N times
+    for (int j = 0; j < repetitions; j++) {
         int status = system(command);
         if (status != 0) {
-            fprintf(stderr, "Command failed with status %d on iteration %d\n", status, i + 1);
+            fprintf(stderr, "Command failed with status %d on iteration %d\n", status, j + 1);
             return status;
         }
     }
 
     return 0;
 }
+
