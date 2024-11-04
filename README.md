@@ -5,4 +5,4 @@
 ## Usage
 
 ```bash
-repeat <command> -n<number_of_repetitions>
+repeat <command> -n <number_of_repetitions>
