@@ -3,11 +3,12 @@
 #include <string.h>
 
 void print_usage() {
-    printf("Usage: repeat <command> -n <number_of_repetitions>\n");
+    printf("Usage: repeat [-n <number_of_repetitions>] <command>\n");
+    printf("Example: repeat -n 5 \"echo Hello\"\n");
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
+    if (argc < 3) {
         print_usage();
         return 1;
     }
@@ -16,26 +17,30 @@ int main(int argc, char *argv[]) {
     char command[1024] = "";  // Buffer to hold the command
 
     // Parse arguments
-    int i = 1;
-    while (i < argc) {
-        // Check for the "-n" flag
-        if (strcmp(argv[i], "-n") == 0) {
-            if (i + 1 < argc) {
+    for (int i = 1; i < argc; i++) {
+        if (strncmp(argv[i], "-n", 2) == 0) {
+            // Handle both "-n5" and "-n 5" formats
+            if (strlen(argv[i]) > 2) {
+                // Format is "-n5"
+                repetitions = atoi(argv[i] + 2);
+            } else if (i + 1 < argc) {
+                // Format is "-n 5"
                 repetitions = atoi(argv[i + 1]);
-                if (repetitions <= 0) {
-                    fprintf(stderr, "Error: The number of repetitions must be a positive integer.\n");
-                    return 1;
-                }
-                i += 2; // Skip the "-n" and the number after it
+                i++;  // Skip the next argument since it's part of -n
             } else {
-                print_usage();
+                fprintf(stderr, "Error: -n flag requires a number\n");
+                return 1;
+            }
+
+            // Ensure repetitions is positive
+            if (repetitions <= 0) {
+                fprintf(stderr, "Error: The number of repetitions must be a positive integer.\n");
                 return 1;
             }
         } else {
-            // Append the command arguments to form the command string
+            // Append arguments to command string
             strcat(command, argv[i]);
             strcat(command, " ");
-            i++;
         }
     }
 
