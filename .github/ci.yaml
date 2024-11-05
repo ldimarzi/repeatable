@@ -25,4 +25,4 @@ jobs:
 
     - name: Test repeat program
       run: |
-        ./repeat "echo Hello, world!" -n5
+        ./repeat "echo Hello, world!" -n 5
