@@ -1,28 +1,51 @@
-name: C Program CI
+name: C CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up C compiler
-      run: sudo apt-get install -y gcc
+      - name: Set up dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y gcc
 
-    - name: Build repeat program
-      run: make
+      - name: Compile
+        run: gcc -o repeat repeat.c
 
-    - name: Test repeat program
-      run: |
-        ./repeat "echo Hello, world!" -n 5
+      - name: Run basic test with verbose output
+        run: ./repeat -n 2 -d 1 -v "echo Hello World"
+
+      - name: Test pipe and grep
+        run: ./repeat -n 2 -d 1 -v "echo Hello | grep Hello"
+
+      - name: Test failure with retries
+        run: ./repeat -n 2 -d 1 -r 3 -l errors.log "echo Hello | grep fail"
+
+      - name: Test logging of errors
+        run: |
+          ./repeat -n 2 -d 1 -l errors.log -r 2 "echo Hello | grep fail"
+          echo "Contents of errors.log after failure:"
+          cat errors.log
+
+      - name: Test timeout
+        run: ./repeat -n 100 -t 5 -d 1 "sleep 1 && echo 'Timeout test'"
+
+      - name: Test until success
+        run: ./repeat -u -d 1 "echo Trying | grep Trying"
+      
+      - name: Test delay between repetitions
+        run: ./repeat -n 3 -d 2 -v "echo 'Testing delay'"
+
+      - name: Cleanup log file
+        run: rm -f errors.log
+

@@ -1,0 +1,13 @@
+# Ignore object files, executables, and other build artifacts
+*.o
+repeat
+*.out
+*.log
+
+# Ignore editor and OS-specific files
+*.swp
+*.swo
+.DS_Store
+.vscode/
+.idea/
+*~
